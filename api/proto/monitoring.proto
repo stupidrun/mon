@@ -3,11 +3,12 @@ package monitoring;
 option go_package = "github.com/stupidrun/mon/api/proto";
 
 message Metric {
-  double cpu_usage = 1;
-  double memory_usage = 2;
-  double network_in = 3;
-  double network_out = 4;
-  int64 timestamp = 5;
+  string name = 1;
+  double cpu_usage = 2;
+  double memory_usage = 3;
+  double network_in = 4;
+  double network_out = 5;
+  int64 timestamp = 6;
 }
 
 message PushMetricsRequest {

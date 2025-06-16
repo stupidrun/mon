@@ -22,7 +22,7 @@ const (
 	MonitoringService_PushMetrics_FullMethodName = "/monitoring.MonitoringService/PushMetrics"
 )
 
-// MonitoringServiceClient is the client API for MonitoringService services.
+// MonitoringServiceClient is the client API for MonitoringService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MonitoringServiceClient interface {
@@ -47,7 +47,7 @@ func (c *monitoringServiceClient) PushMetrics(ctx context.Context, in *PushMetri
 	return out, nil
 }
 
-// MonitoringServiceServer is the server API for MonitoringService services.
+// MonitoringServiceServer is the server API for MonitoringService service.
 // All implementations must embed UnimplementedMonitoringServiceServer
 // for forward compatibility.
 type MonitoringServiceServer interface {
@@ -68,7 +68,7 @@ func (UnimplementedMonitoringServiceServer) PushMetrics(context.Context, *PushMe
 func (UnimplementedMonitoringServiceServer) mustEmbedUnimplementedMonitoringServiceServer() {}
 func (UnimplementedMonitoringServiceServer) testEmbeddedByValue()                           {}
 
-// UnsafeMonitoringServiceServer may be embedded to opt out of forward compatibility for this services.
+// UnsafeMonitoringServiceServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to MonitoringServiceServer will
 // result in compilation errors.
 type UnsafeMonitoringServiceServer interface {
@@ -104,7 +104,7 @@ func _MonitoringService_PushMetrics_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
-// MonitoringService_ServiceDesc is the grpc.ServiceDesc for MonitoringService services.
+// MonitoringService_ServiceDesc is the grpc.ServiceDesc for MonitoringService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var MonitoringService_ServiceDesc = grpc.ServiceDesc{

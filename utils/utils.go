@@ -70,7 +70,7 @@ func GetNetworkIO() (float64, float64, error) {
 	}
 
 	// 等待一秒以计算速率
-	time.Sleep(time.Second)
+	time.Sleep(time.Second * 2)
 
 	// 获取第二次快照
 	ioCounters2, err := net.IOCounters(false)
@@ -82,8 +82,8 @@ func GetNetworkIO() (float64, float64, error) {
 	}
 
 	// 计算差值并转换为KB/s
-	netIn := float64(ioCounters2[0].BytesRecv-ioCounters1[0].BytesRecv) / 1024
-	netOut := float64(ioCounters2[0].BytesSent-ioCounters1[0].BytesSent) / 1024
+	netIn := float64(ioCounters2[0].BytesRecv-ioCounters1[0].BytesRecv) / 1024 / 2
+	netOut := float64(ioCounters2[0].BytesSent-ioCounters1[0].BytesSent) / 1024 / 2
 
 	return netIn, netOut, nil
 }

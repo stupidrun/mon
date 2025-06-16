@@ -12,10 +12,11 @@ import (
 
 type Client struct {
 	conn          *grpc.ClientConn
+	name          string
 	monitorClient proto.MonitoringServiceClient
 }
 
-func NewClient(addr string) (*Client, error) {
+func NewClient(addr string, clientName string) (*Client, error) {
 	clientConn, err := grpc.Dial(
 		addr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -28,6 +29,7 @@ func NewClient(addr string) (*Client, error) {
 	return &Client{
 		conn:          clientConn,
 		monitorClient: client,
+		name:          clientName,
 	}, nil
 }
 
@@ -63,14 +65,15 @@ func StartPeriodicMetricsCollection(ctx context.Context, client *Client, interva
 				continue
 			}
 
+			metric.Name = client.name
 			_, err = client.PushMetrics(ctx, []*proto.Metric{metric})
 			if err != nil {
 				log.Printf("推送指标失败: %v", err)
 				continue
 			}
 
-			log.Printf("已推送系统指标: CPU=%.2f%%, 内存=%.2fMB, 网络上行=%.2fKB/s, 网络下行=%.2fKB/s",
-				metric.CpuUsage, metric.MemoryUsage, metric.NetworkOut, metric.NetworkIn)
+			log.Printf("已推送系统指标: Name=%s, CPU=%.2f%%, 内存=%.2fMB, 网络上行=%.2fKB/s, 网络下行=%.2fKB/s",
+				client.name, metric.CpuUsage, metric.MemoryUsage, metric.NetworkOut, metric.NetworkIn)
 		}
 	}
 }

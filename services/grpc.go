@@ -18,7 +18,7 @@ type MonitoringService struct {
 func NewMonitoringService(store *models.MetricsStore, debug bool) *MonitoringService {
 	return &MonitoringService{
 		store: store,
-		debug: true,
+		debug: debug,
 	}
 }
 
@@ -27,16 +27,16 @@ func (s *MonitoringService) PushMetrics(ctx context.Context, req *proto.PushMetr
 	if !ok {
 		return nil, errors.New("could not extract client IP from context")
 	}
-	isAllowed := s.store.IsIPAllowed(clientIP)
-	if !isAllowed {
-		log.Printf("IP %s is not allowed to push metrics", clientIP)
-		return &proto.PushMetricsResponse{
-			Success: false,
-			Message: "IP not allowed",
-		}, nil
-	}
 	for _, metric := range req.Metrics {
-		s.store.AddMetric(clientIP, models.Metric{
+		if metric.Name == "" {
+			return nil, errors.New("metric name cannot be empty")
+		}
+		if !s.store.IsAllowed(metric.Name) {
+			continue
+		}
+		s.store.AddMetric(metric.Name, models.Metric{
+			Name:        metric.Name,
+			IP:          clientIP,
 			CPUUsage:    metric.CpuUsage,
 			MemoryUsage: metric.MemoryUsage,
 			NetworkIn:   metric.NetworkIn,
@@ -46,7 +46,7 @@ func (s *MonitoringService) PushMetrics(ctx context.Context, req *proto.PushMetr
 	}
 	if s.debug {
 		log.Printf("Received metrics from %s: %v", clientIP, req.Metrics)
-		log.Printf("Current metrics for %s: %v", clientIP, s.store.GetMetrics(clientIP))
+		log.Printf("Current metrics for %s: %v", req.Metrics[0].Name, s.store.GetMetrics(req.Metrics[0].Name))
 	}
 	return &proto.PushMetricsResponse{
 		Success: true,

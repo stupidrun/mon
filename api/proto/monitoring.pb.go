@@ -23,11 +23,12 @@ const (
 
 type Metric struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	CpuUsage      float64                `protobuf:"fixed64,1,opt,name=cpu_usage,json=cpuUsage,proto3" json:"cpu_usage,omitempty"`
-	MemoryUsage   float64                `protobuf:"fixed64,2,opt,name=memory_usage,json=memoryUsage,proto3" json:"memory_usage,omitempty"`
-	NetworkIn     float64                `protobuf:"fixed64,3,opt,name=network_in,json=networkIn,proto3" json:"network_in,omitempty"`
-	NetworkOut    float64                `protobuf:"fixed64,4,opt,name=network_out,json=networkOut,proto3" json:"network_out,omitempty"`
-	Timestamp     int64                  `protobuf:"varint,5,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	CpuUsage      float64                `protobuf:"fixed64,2,opt,name=cpu_usage,json=cpuUsage,proto3" json:"cpu_usage,omitempty"`
+	MemoryUsage   float64                `protobuf:"fixed64,3,opt,name=memory_usage,json=memoryUsage,proto3" json:"memory_usage,omitempty"`
+	NetworkIn     float64                `protobuf:"fixed64,4,opt,name=network_in,json=networkIn,proto3" json:"network_in,omitempty"`
+	NetworkOut    float64                `protobuf:"fixed64,5,opt,name=network_out,json=networkOut,proto3" json:"network_out,omitempty"`
+	Timestamp     int64                  `protobuf:"varint,6,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -60,6 +61,13 @@ func (x *Metric) ProtoReflect() protoreflect.Message {
 // Deprecated: Use Metric.ProtoReflect.Descriptor instead.
 func (*Metric) Descriptor() ([]byte, []int) {
 	return file_api_proto_monitoring_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *Metric) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
 }
 
 func (x *Metric) GetCpuUsage() float64 {
@@ -198,15 +206,16 @@ var File_api_proto_monitoring_proto protoreflect.FileDescriptor
 const file_api_proto_monitoring_proto_rawDesc = "" +
 	"\n" +
 	"\x1aapi/proto/monitoring.proto\x12\n" +
-	"monitoring\"\xa6\x01\n" +
-	"\x06Metric\x12\x1b\n" +
-	"\tcpu_usage\x18\x01 \x01(\x01R\bcpuUsage\x12!\n" +
-	"\fmemory_usage\x18\x02 \x01(\x01R\vmemoryUsage\x12\x1d\n" +
+	"monitoring\"\xba\x01\n" +
+	"\x06Metric\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1b\n" +
+	"\tcpu_usage\x18\x02 \x01(\x01R\bcpuUsage\x12!\n" +
+	"\fmemory_usage\x18\x03 \x01(\x01R\vmemoryUsage\x12\x1d\n" +
 	"\n" +
-	"network_in\x18\x03 \x01(\x01R\tnetworkIn\x12\x1f\n" +
-	"\vnetwork_out\x18\x04 \x01(\x01R\n" +
+	"network_in\x18\x04 \x01(\x01R\tnetworkIn\x12\x1f\n" +
+	"\vnetwork_out\x18\x05 \x01(\x01R\n" +
 	"networkOut\x12\x1c\n" +
-	"\ttimestamp\x18\x05 \x01(\x03R\ttimestamp\"B\n" +
+	"\ttimestamp\x18\x06 \x01(\x03R\ttimestamp\"B\n" +
 	"\x12PushMetricsRequest\x12,\n" +
 	"\ametrics\x18\x01 \x03(\v2\x12.monitoring.MetricR\ametrics\"I\n" +
 	"\x13PushMetricsResponse\x12\x18\n" +

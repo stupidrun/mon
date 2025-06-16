@@ -2,6 +2,7 @@ package bootstrap
 
 import (
 	"context"
+	"github.com/gin-gonic/gin"
 	"github.com/stupidrun/mon/api/middlewares"
 	"github.com/stupidrun/mon/api/proto"
 	"github.com/stupidrun/mon/config"
@@ -17,7 +18,6 @@ var store *models.MetricsStore
 
 func init() {
 	store = models.NewMetricsStore()
-	store.AddAllowedIP("127.0.0.1")
 }
 
 func Store() *models.MetricsStore {
@@ -53,5 +53,57 @@ func Serve(ctx context.Context, c *config.Config) error {
 	return server.Serve(lis)
 }
 
-func WebApi() {
+func WebApi(engine *gin.Engine, cfg *config.Config) {
+	g := engine.Group("/api")
+	g.Use(authMiddleware(config.LoadConfig().AuthToken))
+	g.POST("/add-allowed-name", func(c *gin.Context) {
+		var req struct {
+			Name string `json:"name" binding:"required"`
+		}
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(400, gin.H{"error": "Invalid request"})
+			return
+		}
+		store.AddAllowedName(req.Name)
+		c.JSON(200, gin.H{
+			"success": true,
+			"message": "name added to allowed list",
+		})
+	})
+
+	g.GET("/all-metrics", func(c *gin.Context) {
+		metrics := store.GetAllMetrics()
+		c.JSON(200, gin.H{
+			"success": true,
+			"metrics": metrics,
+		})
+	})
+
+	g.GET("/alive", func(c *gin.Context) {
+		result := store.AliveStatus(cfg.OfflineThresholdSec)
+		c.JSON(200, gin.H{
+			"state": result,
+		})
+	})
+}
+
+func authMiddleware(token string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
+			c.AbortWithStatusJSON(401, gin.H{
+				"success": false,
+				"message": "unauthorized",
+			})
+			return
+		}
+		if authHeader != token {
+			c.AbortWithStatusJSON(403, gin.H{
+				"success": false,
+				"message": "forbidden",
+			})
+			return
+		}
+		c.Next()
+	}
 }
