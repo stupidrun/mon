@@ -117,7 +117,7 @@ func (ms *MetricsStore) AliveStatus(threshold int) map[string]interface{} {
 		t := map[string]interface{}{
 			"ip": lastMetric.IP,
 		}
-		if time.Now().Unix()-lastMetric.Timestamp <= int64(threshold) {
+		if time.Now().UTC().Unix()-lastMetric.Timestamp <= int64(threshold) {
 			t["alive"] = true
 		} else {
 			t["alive"] = false

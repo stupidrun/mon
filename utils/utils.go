@@ -31,7 +31,7 @@ func GetCurrentMetrics() (*proto.Metric, error) {
 		MemoryUsage: memUsage,
 		NetworkIn:   netIn,
 		NetworkOut:  netOut,
-		Timestamp:   time.Now().Unix(),
+		Timestamp:   time.Now().UTC().Unix(),
 	}, nil
 }
 
