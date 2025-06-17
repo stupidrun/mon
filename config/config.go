@@ -14,8 +14,8 @@ type Config struct {
 }
 
 func LoadConfig() *Config {
-	cleanupInterval, _ := strconv.Atoi(getEnv("CLEANUP_INTERVAL_HOURS", "8"))
-	offlineThreshold, _ := strconv.Atoi(getEnv("OFFLINE_THRESHOLD_SEC", "30"))
+	cleanupInterval, _ := strconv.Atoi(getEnv("CLEANUP_INTERVAL_HOURS", "1"))
+	offlineThreshold, _ := strconv.Atoi(getEnv("OFFLINE_THRESHOLD_SEC", "90"))
 
 	return &Config{
 		AuthToken:            getEnv("AUTH_TOKEN", "this_is_bullshit"),

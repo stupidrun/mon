@@ -56,18 +56,23 @@ func Serve(ctx context.Context, c *config.Config) error {
 func WebApi(engine *gin.Engine, cfg *config.Config) {
 	g := engine.Group("/api")
 	g.Use(authMiddleware(config.LoadConfig().AuthToken))
-	g.POST("/add-allowed-name", func(c *gin.Context) {
+	g.POST("/allowed-names", func(c *gin.Context) {
 		var req struct {
-			Name string `json:"name" binding:"required"`
+			Names []string `json:"names" binding:"required"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(400, gin.H{"error": "Invalid request"})
 			return
 		}
-		store.AddAllowedName(req.Name)
+		for _, name := range req.Names {
+			if name == "" {
+				continue
+			}
+			store.AddAllowedName(name)
+		}
 		c.JSON(200, gin.H{
 			"success": true,
-			"message": "name added to allowed list",
+			"names":   store.GetAllowedNames(),
 		})
 	})
 
@@ -76,6 +81,23 @@ func WebApi(engine *gin.Engine, cfg *config.Config) {
 		c.JSON(200, gin.H{
 			"success": true,
 			"metrics": metrics,
+		})
+	})
+
+	g.DELETE("/allowed-names", func(c *gin.Context) {
+		var req struct {
+			Names []string `json:"names" binding:"required"`
+		}
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(400, gin.H{"error": "Invalid request"})
+			return
+		}
+		for _, name := range req.Names {
+			store.RemoveName(name)
+		}
+		c.JSON(200, gin.H{
+			"success": true,
+			"names":   store.GetAllowedNames(),
 		})
 	})
 

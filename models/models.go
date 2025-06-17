@@ -68,6 +68,34 @@ func (ms *MetricsStore) GetMetrics(name string) []Metric {
 	return ms.metrics[name]
 }
 
+func (ms *MetricsStore) GetAllowedNames() []string {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
+
+	// Return a copy of the allowed names to avoid external modifications
+	return append([]string(nil), ms.allowedNames...)
+}
+
+func (ms *MetricsStore) RemoveName(name string) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+
+	if !ms.IsAllowed(name) {
+		return
+	}
+
+	// Remove the name from allowed names
+	for i, n := range ms.allowedNames {
+		if n == name {
+			ms.allowedNames = append(ms.allowedNames[:i], ms.allowedNames[i+1:]...)
+			break
+		}
+	}
+
+	// Remove all metrics associated with this name
+	delete(ms.metrics, name)
+}
+
 func (ms *MetricsStore) Cleanup() {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
@@ -106,8 +134,8 @@ func (ms *MetricsStore) AliveStatus(threshold int) map[string]interface{} {
 		metrics, exists := ms.metrics[name]
 		if !exists || len(metrics) == 0 {
 			status[name] = map[string]interface{}{
-				"alive": false,
-				"ip":    "",
+				"alive":         false,
+				"latest-metric": nil,
 			}
 			continue
 		}
@@ -115,7 +143,7 @@ func (ms *MetricsStore) AliveStatus(threshold int) map[string]interface{} {
 		// Check if the last metric is within the offline threshold
 		lastMetric := metrics[len(metrics)-1]
 		t := map[string]interface{}{
-			"ip": lastMetric.IP,
+			"latest-metric": lastMetric,
 		}
 		if time.Now().UTC().Unix()-lastMetric.Timestamp <= int64(threshold) {
 			t["alive"] = true
