@@ -47,8 +47,8 @@ func (c *Client) PushMetrics(ctx context.Context, metrics []*proto.Metric) (*pro
 	return c.monitorClient.PushMetrics(ctx, req)
 }
 
-func StartPeriodicMetricsCollection(ctx context.Context, client *Client, interval time.Duration) {
-	ticker := time.NewTicker(interval)
+func StartPeriodicMetricsCollection(ctx context.Context, client *Client, interval int) {
+	ticker := time.NewTicker(time.Second * time.Duration(interval))
 	defer ticker.Stop()
 
 	log.Printf("开始每 %v 收集一次系统指标", interval)
@@ -59,7 +59,7 @@ func StartPeriodicMetricsCollection(ctx context.Context, client *Client, interva
 			log.Println("指标收集已停止")
 			return
 		case <-ticker.C:
-			metric, err := utils.GetCurrentMetrics()
+			metric, err := utils.GetCurrentMetrics(interval)
 			if err != nil {
 				log.Printf("获取系统指标失败: %v", err)
 				continue

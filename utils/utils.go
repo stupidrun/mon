@@ -10,7 +10,7 @@ import (
 )
 
 // GetCurrentMetrics 获取当前系统的监控指标
-func GetCurrentMetrics() (*proto.Metric, error) {
+func GetCurrentMetrics(threshold int) (*proto.Metric, error) {
 	cpuUsage, err := GetCPUUsage()
 	if err != nil {
 		return nil, fmt.Errorf("获取CPU使用率失败: %w", err)
@@ -21,7 +21,7 @@ func GetCurrentMetrics() (*proto.Metric, error) {
 		return nil, fmt.Errorf("获取内存使用率失败: %w", err)
 	}
 
-	netIn, netOut, err := GetNetworkIO()
+	netIn, netOut, err := GetNetworkIO(threshold)
 	if err != nil {
 		return nil, fmt.Errorf("获取网络流量失败: %w", err)
 	}
@@ -59,7 +59,7 @@ func GetMemoryUsage() (float64, error) {
 }
 
 // GetNetworkIO 获取网络IO(KB/s)
-func GetNetworkIO() (float64, float64, error) {
+func GetNetworkIO(threshold int) (float64, float64, error) {
 	// 获取第一次快照
 	ioCounters1, err := net.IOCounters(false)
 	if err != nil {
@@ -70,7 +70,7 @@ func GetNetworkIO() (float64, float64, error) {
 	}
 
 	// 等待一秒以计算速率
-	time.Sleep(time.Second * 2)
+	time.Sleep(time.Second * time.Duration(threshold))
 
 	// 获取第二次快照
 	ioCounters2, err := net.IOCounters(false)
@@ -82,8 +82,8 @@ func GetNetworkIO() (float64, float64, error) {
 	}
 
 	// 计算差值并转换为KB/s
-	netIn := float64(ioCounters2[0].BytesRecv-ioCounters1[0].BytesRecv) / 1024 / 2
-	netOut := float64(ioCounters2[0].BytesSent-ioCounters1[0].BytesSent) / 1024 / 2
+	netIn := float64(ioCounters2[0].BytesRecv-ioCounters1[0].BytesRecv) / float64(1024/threshold)
+	netOut := float64(ioCounters2[0].BytesSent-ioCounters1[0].BytesSent) / float64(1024/threshold)
 
 	return netIn, netOut, nil
 }

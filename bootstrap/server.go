@@ -107,6 +107,28 @@ func WebApi(engine *gin.Engine, cfg *config.Config) {
 			"state": result,
 		})
 	})
+
+	g.GET("/metrics", func(c *gin.Context) {
+		name := c.Query("name")
+		if name == "" {
+			c.JSON(400, gin.H{"error": "name query parameter is required"})
+			return
+		}
+		if !store.IsAllowed(name) {
+			c.JSON(400, gin.H{"error": "name not allowed"})
+			return
+		}
+		metrics := store.GetMetrics(name)
+		if metrics == nil {
+			c.JSON(404, gin.H{"error": "no metrics found for this name"})
+			return
+		}
+		c.JSON(200, gin.H{
+			"success": true,
+			"name":    name,
+			"metrics": metrics,
+		})
+	})
 }
 
 func authMiddleware(token string) gin.HandlerFunc {

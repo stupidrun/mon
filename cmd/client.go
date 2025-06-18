@@ -14,6 +14,7 @@ import (
 
 func main() {
 	clientName := flag.String("n", "", "Name of the client")
+	interval := flag.Int("i", 10, "Metrics collection interval in seconds")
 	flag.Parse()
 
 	if *clientName == "" {
@@ -27,7 +28,7 @@ func main() {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	go bootstrap.StartPeriodicMetricsCollection(ctx, client, 10*time.Second)
+	go bootstrap.StartPeriodicMetricsCollection(ctx, client, *interval)
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, os.Kill, syscall.SIGTERM, syscall.SIGINT)

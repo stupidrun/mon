@@ -125,6 +125,18 @@ func (ms *MetricsStore) GetAllMetrics() map[string][]Metric {
 	return metricsCopy
 }
 
+func (ms *MetricsStore) GetMetricsByName(name string) []Metric {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
+
+	if !ms.IsAllowed(name) {
+		return nil
+	}
+
+	// Return a copy of the metrics for the given name to avoid external modifications
+	return append([]Metric(nil), ms.metrics[name]...)
+}
+
 func (ms *MetricsStore) AliveStatus(threshold int) map[string]interface{} {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
