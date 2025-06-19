@@ -14,6 +14,19 @@ import (
 	"time"
 )
 
+func corsMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(http.StatusNoContent)
+			return
+		}
+		c.Next()
+	}
+}
+
 func main() {
 	cfg := config.LoadConfig()
 	ctx, cancel := context.WithCancel(context.Background())
@@ -42,6 +55,7 @@ func main() {
 	go func() {
 		gin.SetMode(gin.ReleaseMode)
 		e := gin.Default()
+		e.Use(corsMiddleware())
 		bootstrap.WebApi(e, cfg)
 		srv := http.Server{
 			Addr:    ":7920",
